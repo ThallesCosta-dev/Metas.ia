@@ -230,9 +230,7 @@ export default function Dashboard() {
 
         {/* Calendar View */}
         {viewMode === "calendar" && (
-          <div className="p-8 rounded-lg border border-border/60 bg-card text-center">
-            <p className="text-muted-foreground">Calendar view coming soon</p>
-          </div>
+          <CalendarView goals={sortedGoals} />
         )}
       </main>
 
