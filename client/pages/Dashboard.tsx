@@ -70,13 +70,24 @@ export default function Dashboard() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">My Goals</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {goals.length} goals • {statusCounts.completed} completed
+                Level {gamificationStats.level} • {gamificationStats.totalPoints} pts • {goals.length} goals
               </p>
             </div>
-            <Button onClick={() => setShowCreateModal(true)} size="lg" className="gap-2">
-              <Plus className="h-5 w-5" />
-              New Goal
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowAchievements(!showAchievements)}
+                size="lg"
+                className="gap-2"
+              >
+                <Trophy className="h-5 w-5" />
+                Achievements
+              </Button>
+              <Button onClick={() => setShowCreateModal(true)} size="lg" className="gap-2">
+                <Plus className="h-5 w-5" />
+                New Goal
+              </Button>
+            </div>
           </div>
         </div>
       </header>
