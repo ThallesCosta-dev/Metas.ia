@@ -72,7 +72,7 @@ export function useGoals() {
   const addGoal = (goal: Omit<Goal, "id" | "createdAt" | "updatedAt">) => {
     const newGoal: Goal = {
       ...goal,
-      id: uuidv4(),
+      id: generateUUID(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
