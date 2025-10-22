@@ -11,6 +11,7 @@ import {
 import { Goal, GoalStatus, GoalCategory, PriorityLevel } from "@shared/api";
 import GoalCard from "@/components/GoalCard";
 import CreateGoalModal from "@/components/CreateGoalModal";
+import CalendarView from "@/components/CalendarView";
 import { useGoals } from "@/hooks/useGoals";
 
 export default function Dashboard() {
