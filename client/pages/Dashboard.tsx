@@ -19,6 +19,7 @@ import { useGamification } from "@/hooks/useGamification";
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<GoalStatus | "all">("all");
   const [filterCategory, setFilterCategory] = useState<GoalCategory | "all">("all");
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<"dueDate" | "priority" | "progress" | "created">("dueDate");
 
   const { goals, addGoal, updateGoal, deleteGoal, stats } = useGoals();
+  const gamificationStats = useGamification(goals);
 
   const filteredGoals = goals.filter((goal) => {
     const matchesSearch =
