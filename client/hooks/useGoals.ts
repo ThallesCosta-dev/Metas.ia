@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
 import { Goal, GoalStats } from "@shared/api";
-import { v4 as uuidv4 } from "crypto";
 
 const STORAGE_KEY = "goals";
+
+// Simple UUID v4 generator
+function generateUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 export function useGoals() {
   const [goals, setGoals] = useState<Goal[]>([]);
