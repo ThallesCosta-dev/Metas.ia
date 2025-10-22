@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Filter, Search, Calendar, List, MoreVertical } from "lucide-react";
+import { Plus, Filter, Search, Calendar, List, MoreVertical, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +12,9 @@ import { Goal, GoalStatus, GoalCategory, PriorityLevel } from "@shared/api";
 import GoalCard from "@/components/GoalCard";
 import CreateGoalModal from "@/components/CreateGoalModal";
 import CalendarView from "@/components/CalendarView";
+import GamificationPanel from "@/components/GamificationPanel";
 import { useGoals } from "@/hooks/useGoals";
+import { useGamification } from "@/hooks/useGamification";
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
