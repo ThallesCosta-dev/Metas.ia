@@ -3,29 +3,48 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Plus, Trash2, CheckCircle2, DollarSign } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, CheckCircle2, DollarSign, Loader } from "lucide-react";
 import { Goal, Subgoal } from "@shared/api";
-import { useGoals } from "@/hooks/useGoals";
+import { useGoalsApi } from "@/hooks/useGoalsApi";
+import { useSubgoalsApi } from "@/hooks/useSubgoalsApi";
+import { useTransactionsApi } from "@/hooks/useTransactionsApi";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function GoalDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { goals, updateGoal } = useGoals();
+  const { getGoal, updateGoal } = useGoalsApi();
+  const { getSubgoals, createSubgoal, updateSubgoal, deleteSubgoal } = useSubgoalsApi();
+  const { getTransactions } = useTransactionsApi();
+
   const [goal, setGoal] = useState<Goal | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [editedGoal, setEditedGoal] = useState<Goal | null>(null);
   const [newSubgoal, setNewSubgoal] = useState({ title: "", dueDate: "" });
+  const [loading, setLoading] = useState(true);
 
+  // Load goal and subgoals
   useEffect(() => {
-    const found = goals.find((g) => g.id === id);
-    if (found) {
-      setGoal(found);
-      setEditedGoal(found);
-    } else {
-      navigate("/dashboard");
-    }
-  }, [id, goals, navigate]);
+    const loadGoal = async () => {
+      if (!id) {
+        navigate("/dashboard");
+        return;
+      }
+
+      const fetchedGoal = await getGoal(id);
+      if (fetchedGoal) {
+        setGoal(fetchedGoal);
+        setEditedGoal(fetchedGoal);
+      } else {
+        toast.error("Goal not found");
+        navigate("/dashboard");
+      }
+      setLoading(false);
+    };
+
+    loadGoal();
+  }, [id, getGoal, navigate]);
 
   if (!goal || !editedGoal) return null;
 
