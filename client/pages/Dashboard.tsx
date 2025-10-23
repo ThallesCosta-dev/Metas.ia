@@ -13,8 +13,9 @@ import GoalCard from "@/components/GoalCard";
 import CreateGoalModal from "@/components/CreateGoalModal";
 import CalendarView from "@/components/CalendarView";
 import GamificationPanel from "@/components/GamificationPanel";
-import { useGoals } from "@/hooks/useGoals";
+import { useGoalsApi } from "@/hooks/useGoalsApi";
 import { useGamification } from "@/hooks/useGamification";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
@@ -25,9 +26,20 @@ export default function Dashboard() {
   const [filterCategory, setFilterCategory] = useState<GoalCategory | "all">("all");
   const [filterPriority, setFilterPriority] = useState<PriorityLevel | "all">("all");
   const [sortBy, setSortBy] = useState<"dueDate" | "priority" | "progress" | "created">("dueDate");
+  const [goals, setGoals] = useState<Goal[]>([]);
 
-  const { goals, addGoal, updateGoal, deleteGoal, stats } = useGoals();
+  const { getGoals, createGoal, updateGoal, deleteGoal, loading } = useGoalsApi();
   const gamificationStats = useGamification(goals);
+
+  // Load goals on mount
+  useEffect(() => {
+    const loadGoals = async () => {
+      const fetchedGoals = await getGoals();
+      setGoals(fetchedGoals);
+    };
+
+    loadGoals();
+  }, [getGoals]);
 
   const filteredGoals = goals.filter((goal) => {
     const matchesSearch =
