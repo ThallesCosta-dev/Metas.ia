@@ -9,20 +9,18 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelayMs: 0,
   charset: "utf8mb4",
 });
 
-// Test the connection
+// Test the connection (non-blocking)
 pool.getConnection()
   .then((connection) => {
     console.log("✅ Database connected successfully");
     connection.release();
   })
   .catch((err) => {
-    console.error("❌ Database connection failed:", err.message);
-    process.exit(1);
+    console.warn("⚠️ Database connection failed:", err.message);
+    console.warn("Make sure your database is running and credentials are correct");
   });
 
 export default pool;
