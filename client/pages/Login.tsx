@@ -22,7 +22,12 @@ export default function Login() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = { error: "Invalid response from server" };
+      }
 
       if (!response.ok) {
         toast.error(data.error || "Login failed");
