@@ -80,32 +80,14 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
         subgoals: [],
       };
 
-      let finalGoal: Omit<Goal, "id" | "createdAt" | "updatedAt">;
+      const apiData = {
+        ...baseGoal,
+        target_value: formData.type === "financial" ? parseFloat(formData.targetValue || "0") : undefined,
+        currency: formData.type === "financial" ? formData.currency : undefined,
+        is_financial: formData.type === "financial",
+      };
 
-      if (formData.type === "financial") {
-        const targetValue = formData.targetValue ? parseFloat(formData.targetValue) : 0;
-        const daysToGoal = Math.ceil(
-          (new Date(formData.dueDate).getTime() - new Date(formData.startDate).getTime()) /
-            (1000 * 60 * 60 * 24)
-        );
-
-        finalGoal = {
-          ...baseGoal,
-          financialDetails: {
-            currency: formData.currency,
-            targetValue,
-            currentValue: 0,
-            contributions: [],
-            savingsPerDay: targetValue / (daysToGoal || 1),
-            savingsPerWeek: (targetValue / (daysToGoal || 1)) * 7,
-            savingsPerMonth: (targetValue / (daysToGoal || 1)) * 30,
-          },
-        };
-      } else {
-        finalGoal = baseGoal;
-      }
-
-      onCreate(finalGoal);
+      onCreate(apiData as any);
       setFormData({
         title: "",
         description: "",
