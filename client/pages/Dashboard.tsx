@@ -278,7 +278,18 @@ export default function Dashboard() {
       <CreateGoalModal
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
-        onCreate={addGoal}
+        onCreate={async (goalData) => {
+          const result = await createGoal(goalData);
+          if (result) {
+            toast.success("Goal created successfully!");
+            setShowCreateModal(false);
+            // Reload goals
+            const fetchedGoals = await getGoals();
+            setGoals(fetchedGoals);
+          } else {
+            toast.error("Failed to create goal");
+          }
+        }}
       />
     </div>
   );
