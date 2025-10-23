@@ -46,54 +46,83 @@ export default function GoalDetail() {
     loadGoal();
   }, [id, getGoal, navigate]);
 
-  if (!goal || !editedGoal) return null;
+  if (!goal || !editedGoal) {
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+    return null;
+  }
 
-  const handleSave = () => {
-    updateGoal(goal.id, editedGoal);
-    setEditMode(false);
+  const handleSave = async () => {
+    const success = await updateGoal(goal.id, editedGoal);
+    if (success) {
+      setEditMode(false);
+      toast.success("Goal updated successfully!");
+      const fetchedGoal = await getGoal(goal.id);
+      if (fetchedGoal) {
+        setGoal(fetchedGoal);
+        setEditedGoal(fetchedGoal);
+      }
+    } else {
+      toast.error("Failed to update goal");
+    }
   };
 
-  const handleAddSubgoal = () => {
+  const handleAddSubgoal = async () => {
     if (!newSubgoal.title || !newSubgoal.dueDate) return;
 
-    const subgoal: Subgoal = {
-      id: `subgoal-${Date.now()}`,
+    const result = await createSubgoal(goal.id, {
       title: newSubgoal.title,
-      status: "not_started",
-      dueDate: newSubgoal.dueDate,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      due_date: newSubgoal.dueDate,
+    });
 
-    const updated = {
-      ...editedGoal,
-      subgoals: [...editedGoal.subgoals, subgoal],
-    };
-    setEditedGoal(updated);
-    setNewSubgoal({ title: "", dueDate: "" });
+    if (result) {
+      setNewSubgoal({ title: "", dueDate: "" });
+      toast.success("Subgoal created successfully!");
+      const fetchedGoal = await getGoal(goal.id);
+      if (fetchedGoal) {
+        setGoal(fetchedGoal);
+        setEditedGoal(fetchedGoal);
+      }
+    } else {
+      toast.error("Failed to create subgoal");
+    }
   };
 
-  const handleDeleteSubgoal = (subgoalId: string) => {
-    const updated = {
-      ...editedGoal,
-      subgoals: editedGoal.subgoals.filter((s) => s.id !== subgoalId),
-    };
-    setEditedGoal(updated);
+  const handleDeleteSubgoal = async (subgoalId: string | number) => {
+    const success = await deleteSubgoal(goal.id, subgoalId);
+    if (success) {
+      toast.success("Subgoal deleted successfully!");
+      const fetchedGoal = await getGoal(goal.id);
+      if (fetchedGoal) {
+        setGoal(fetchedGoal);
+        setEditedGoal(fetchedGoal);
+      }
+    } else {
+      toast.error("Failed to delete subgoal");
+    }
   };
 
-  const handleToggleSubgoal = (subgoalId: string) => {
-    const updated = {
-      ...editedGoal,
-      subgoals: editedGoal.subgoals.map((s) =>
-        s.id === subgoalId
-          ? {
-              ...s,
-              status: s.status === "completed" ? "in_progress" : "completed",
-            }
-          : s
-      ),
-    };
-    setEditedGoal(updated);
+  const handleToggleSubgoal = async (subgoalId: string | number) => {
+    const subgoal = editedGoal.subgoals.find((s) => s.id === subgoalId);
+    if (!subgoal) return;
+
+    const newStatus = subgoal.status === "completed" ? "in_progress" : "completed";
+    const success = await updateSubgoal(goal.id, subgoalId, { status: newStatus });
+
+    if (success) {
+      const fetchedGoal = await getGoal(goal.id);
+      if (fetchedGoal) {
+        setGoal(fetchedGoal);
+        setEditedGoal(fetchedGoal);
+      }
+    } else {
+      toast.error("Failed to update subgoal");
+    }
   };
 
   const subgoalProgress =
