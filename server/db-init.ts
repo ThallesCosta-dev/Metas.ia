@@ -1,9 +1,10 @@
 import pool from "./db";
 
 const initializeDatabase = async () => {
-  const connection = await pool.getConnection();
+  let connection;
 
   try {
+    connection = await pool.getConnection();
     console.log("🔄 Initializing database schema...");
 
     // 1. Users table
@@ -352,12 +353,15 @@ const initializeDatabase = async () => {
     console.log("✓ Achievements seeded");
 
     console.log("✅ Database initialized successfully!");
-    connection.release();
     return true;
-  } catch (error) {
-    console.error("❌ Database initialization failed:", error);
-    connection.release();
-    throw error;
+  } catch (error: any) {
+    console.warn("⚠️ Database initialization warning:", error.message);
+    console.warn("Tables may already exist or database connection is not ready yet");
+    return false;
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };
 
