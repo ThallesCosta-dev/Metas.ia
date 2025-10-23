@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { z } from "zod";
-import { Goal, GoalType, GoalCategory, PriorityLevel, Currency } from "@shared/api";
+import {
+  Goal,
+  GoalType,
+  GoalCategory,
+  PriorityLevel,
+  Currency,
+} from "@shared/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -48,7 +54,11 @@ interface CreateGoalModalProps {
   onCreate: (goal: Omit<Goal, "id" | "createdAt" | "updatedAt">) => void;
 }
 
-export default function CreateGoalModal({ open, onOpenChange, onCreate }: CreateGoalModalProps) {
+export default function CreateGoalModal({
+  open,
+  onOpenChange,
+  onCreate,
+}: CreateGoalModalProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -56,7 +66,9 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
     category: "personal" as GoalCategory,
     priority: "medium" as PriorityLevel,
     startDate: new Date().toISOString().split("T")[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     targetValue: "",
     currency: "USD" as Currency,
   });
@@ -82,7 +94,10 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
 
       const apiData = {
         ...baseGoal,
-        target_value: formData.type === "financial" ? parseFloat(formData.targetValue || "0") : undefined,
+        target_value:
+          formData.type === "financial"
+            ? parseFloat(formData.targetValue || "0")
+            : undefined,
         currency: formData.type === "financial" ? formData.currency : undefined,
         is_financial: formData.type === "financial",
       };
@@ -95,7 +110,9 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
         category: "personal",
         priority: "medium",
         startDate: new Date().toISOString().split("T")[0],
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
         targetValue: "",
         currency: "USD",
       });
@@ -130,10 +147,14 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
                 id="title"
                 placeholder="e.g., Save for vacation"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 className={errors.title ? "border-destructive" : ""}
               />
-              {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
+              {errors.title && (
+                <p className="text-xs text-destructive mt-1">{errors.title}</p>
+              )}
             </div>
 
             <div>
@@ -142,12 +163,16 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
                 id="description"
                 placeholder="Describe your goal in detail..."
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 className={errors.description ? "border-destructive" : ""}
                 rows={3}
               />
               {errors.description && (
-                <p className="text-xs text-destructive mt-1">{errors.description}</p>
+                <p className="text-xs text-destructive mt-1">
+                  {errors.description}
+                </p>
               )}
             </div>
           </div>
@@ -156,7 +181,12 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type">Goal Type</Label>
-              <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
+              <Select
+                value={formData.type}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, type: value })
+                }
+              >
                 <SelectTrigger id="type">
                   <SelectValue />
                 </SelectTrigger>
@@ -169,7 +199,12 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
 
             <div>
               <Label htmlFor="category">Category</Label>
-              <Select value={formData.category} onValueChange={(value: any) => setFormData({ ...formData, category: value })}>
+              <Select
+                value={formData.category}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, category: value })
+                }
+              >
                 <SelectTrigger id="category">
                   <SelectValue />
                 </SelectTrigger>
@@ -191,7 +226,12 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="priority">Priority</Label>
-              <Select value={formData.priority} onValueChange={(value: any) => setFormData({ ...formData, priority: value })}>
+              <Select
+                value={formData.priority}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, priority: value })
+                }
+              >
                 <SelectTrigger id="priority">
                   <SelectValue />
                 </SelectTrigger>
@@ -210,7 +250,9 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
                 id="startDate"
                 type="date"
                 value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
               />
             </div>
 
@@ -220,7 +262,9 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
                 id="dueDate"
                 type="date"
                 value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, dueDate: e.target.value })
+                }
               />
             </div>
           </div>
@@ -237,13 +281,20 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
                     type="number"
                     placeholder="10000"
                     value={formData.targetValue}
-                    onChange={(e) => setFormData({ ...formData, targetValue: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, targetValue: e.target.value })
+                    }
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="currency">Currency</Label>
-                  <Select value={formData.currency} onValueChange={(value: any) => setFormData({ ...formData, currency: value })}>
+                  <Select
+                    value={formData.currency}
+                    onValueChange={(value: any) =>
+                      setFormData({ ...formData, currency: value })
+                    }
+                  >
                     <SelectTrigger id="currency">
                       <SelectValue />
                     </SelectTrigger>
@@ -260,7 +311,11 @@ export default function CreateGoalModal({ open, onOpenChange, onCreate }: Create
 
           {/* Actions */}
           <div className="flex gap-3 justify-end pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit">Create Goal</Button>

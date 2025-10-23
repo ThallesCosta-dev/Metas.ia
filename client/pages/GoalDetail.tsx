@@ -3,7 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Plus, Trash2, CheckCircle2, DollarSign, Loader } from "lucide-react";
+import {
+  ChevronLeft,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  DollarSign,
+  Loader,
+} from "lucide-react";
 import { Goal, Subgoal } from "@shared/api";
 import { useGoalsApi } from "@/hooks/useGoalsApi";
 import { useSubgoalsApi } from "@/hooks/useSubgoalsApi";
@@ -15,7 +22,8 @@ export default function GoalDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getGoal, updateGoal } = useGoalsApi();
-  const { getSubgoals, createSubgoal, updateSubgoal, deleteSubgoal } = useSubgoalsApi();
+  const { getSubgoals, createSubgoal, updateSubgoal, deleteSubgoal } =
+    useSubgoalsApi();
   const { getTransactions } = useTransactionsApi();
 
   const [goal, setGoal] = useState<Goal | null>(null);
@@ -111,8 +119,11 @@ export default function GoalDetail() {
     const subgoal = editedGoal.subgoals.find((s) => s.id === subgoalId);
     if (!subgoal) return;
 
-    const newStatus = subgoal.status === "completed" ? "in_progress" : "completed";
-    const success = await updateSubgoal(goal.id, subgoalId, { status: newStatus });
+    const newStatus =
+      subgoal.status === "completed" ? "in_progress" : "completed";
+    const success = await updateSubgoal(goal.id, subgoalId, {
+      status: newStatus,
+    });
 
     if (success) {
       const fetchedGoal = await getGoal(goal.id);
@@ -130,7 +141,7 @@ export default function GoalDetail() {
       ? Math.round(
           (editedGoal.subgoals.filter((s) => s.status === "completed").length /
             editedGoal.subgoals.length) *
-            100
+            100,
         )
       : 0;
 
@@ -150,7 +161,12 @@ export default function GoalDetail() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            className="gap-2"
+          >
             <ChevronLeft className="h-4 w-4" />
             Back
           </Button>
@@ -178,11 +194,15 @@ export default function GoalDetail() {
               {editMode ? (
                 <Input
                   value={editedGoal.title}
-                  onChange={(e) => setEditedGoal({ ...editedGoal, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditedGoal({ ...editedGoal, title: e.target.value })
+                  }
                   className="text-3xl font-bold mb-2"
                 />
               ) : (
-                <h1 className="text-4xl font-bold text-foreground mb-2">{editedGoal.title}</h1>
+                <h1 className="text-4xl font-bold text-foreground mb-2">
+                  {editedGoal.title}
+                </h1>
               )}
 
               <div className="flex flex-wrap gap-2 items-center">
@@ -192,8 +212,8 @@ export default function GoalDetail() {
                     editedGoal.status === "completed"
                       ? "bg-success/10 text-success border-success"
                       : editedGoal.status === "in_progress"
-                      ? "bg-primary/10 text-primary border-primary"
-                      : "bg-accent/10 text-accent border-accent"
+                        ? "bg-primary/10 text-primary border-primary"
+                        : "bg-accent/10 text-accent border-accent",
                   )}
                 >
                   {editedGoal.status.replace("_", " ")}
@@ -208,12 +228,16 @@ export default function GoalDetail() {
           {editMode ? (
             <Textarea
               value={editedGoal.description}
-              onChange={(e) => setEditedGoal({ ...editedGoal, description: e.target.value })}
+              onChange={(e) =>
+                setEditedGoal({ ...editedGoal, description: e.target.value })
+              }
               className="text-base"
               rows={4}
             />
           ) : (
-            <p className="text-lg text-muted-foreground">{editedGoal.description}</p>
+            <p className="text-lg text-muted-foreground">
+              {editedGoal.description}
+            </p>
           )}
         </div>
 
@@ -225,7 +249,9 @@ export default function GoalDetail() {
               <Input
                 type="date"
                 value={editedGoal.startDate}
-                onChange={(e) => setEditedGoal({ ...editedGoal, startDate: e.target.value })}
+                onChange={(e) =>
+                  setEditedGoal({ ...editedGoal, startDate: e.target.value })
+                }
               />
             ) : (
               <p className="text-lg font-semibold">
@@ -239,7 +265,9 @@ export default function GoalDetail() {
               <Input
                 type="date"
                 value={editedGoal.dueDate}
-                onChange={(e) => setEditedGoal({ ...editedGoal, dueDate: e.target.value })}
+                onChange={(e) =>
+                  setEditedGoal({ ...editedGoal, dueDate: e.target.value })
+                }
               />
             ) : (
               <p className="text-lg font-semibold">
@@ -252,24 +280,35 @@ export default function GoalDetail() {
         {/* Financial Details */}
         {editedGoal.type === "financial" && editedGoal.financialDetails && (
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-foreground">Financial Progress</h3>
+            <h3 className="text-2xl font-bold text-foreground">
+              Financial Progress
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-6 rounded-lg border border-border/60 bg-card">
-                <p className="text-sm text-muted-foreground mb-2">Target Value</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Target Value
+                </p>
                 <p className="text-3xl font-bold text-foreground">
-                  {editedGoal.financialDetails.currency} {editedGoal.financialDetails.targetValue.toLocaleString()}
+                  {editedGoal.financialDetails.currency}{" "}
+                  {editedGoal.financialDetails.targetValue.toLocaleString()}
                 </p>
               </div>
               <div className="p-6 rounded-lg border border-border/60 bg-card">
-                <p className="text-sm text-muted-foreground mb-2">Current Value</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Current Value
+                </p>
                 <p className="text-3xl font-bold text-primary">
-                  {editedGoal.financialDetails.currency} {editedGoal.financialDetails.currentValue.toLocaleString()}
+                  {editedGoal.financialDetails.currency}{" "}
+                  {editedGoal.financialDetails.currentValue.toLocaleString()}
                 </p>
               </div>
               <div className="p-6 rounded-lg border border-border/60 bg-card">
-                <p className="text-sm text-muted-foreground mb-2">Monthly Savings Target</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Monthly Savings Target
+                </p>
                 <p className="text-3xl font-bold text-accent">
-                  {editedGoal.financialDetails.currency} {editedGoal.financialDetails.savingsPerMonth?.toLocaleString()}
+                  {editedGoal.financialDetails.currency}{" "}
+                  {editedGoal.financialDetails.savingsPerMonth?.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -287,14 +326,18 @@ export default function GoalDetail() {
                   />
                   <Button
                     onClick={() => {
-                      const input = document.getElementById("contribution") as HTMLInputElement;
+                      const input = document.getElementById(
+                        "contribution",
+                      ) as HTMLInputElement;
                       const amount = parseFloat(input.value);
                       if (amount > 0) {
                         setEditedGoal({
                           ...editedGoal,
                           financialDetails: {
                             ...editedGoal.financialDetails!,
-                            currentValue: editedGoal.financialDetails!.currentValue + amount,
+                            currentValue:
+                              editedGoal.financialDetails!.currentValue +
+                              amount,
                             contributions: [
                               ...editedGoal.financialDetails!.contributions,
                               {
@@ -323,7 +366,9 @@ export default function GoalDetail() {
               Subgoals ({editedGoal.subgoals.length})
             </h3>
             {editMode && (
-              <span className="text-sm text-muted-foreground">{subgoalProgress}% complete</span>
+              <span className="text-sm text-muted-foreground">
+                {subgoalProgress}% complete
+              </span>
             )}
           </div>
 
@@ -340,16 +385,19 @@ export default function GoalDetail() {
                       "h-6 w-6 rounded border-2 flex items-center justify-center transition-all flex-shrink-0",
                       subgoal.status === "completed"
                         ? "bg-success border-success"
-                        : "border-border hover:border-primary"
+                        : "border-border hover:border-primary",
                     )}
                   >
-                    {subgoal.status === "completed" && <CheckCircle2 className="h-4 w-4 text-white" />}
+                    {subgoal.status === "completed" && (
+                      <CheckCircle2 className="h-4 w-4 text-white" />
+                    )}
                   </button>
                   <div className="flex-1 min-w-0">
                     <p
                       className={cn(
                         "font-medium",
-                        subgoal.status === "completed" && "line-through text-muted-foreground"
+                        subgoal.status === "completed" &&
+                          "line-through text-muted-foreground",
                       )}
                     >
                       {subgoal.title}
@@ -380,12 +428,16 @@ export default function GoalDetail() {
                 <Input
                   placeholder="Subgoal title"
                   value={newSubgoal.title}
-                  onChange={(e) => setNewSubgoal({ ...newSubgoal, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewSubgoal({ ...newSubgoal, title: e.target.value })
+                  }
                 />
                 <Input
                   type="date"
                   value={newSubgoal.dueDate}
-                  onChange={(e) => setNewSubgoal({ ...newSubgoal, dueDate: e.target.value })}
+                  onChange={(e) =>
+                    setNewSubgoal({ ...newSubgoal, dueDate: e.target.value })
+                  }
                 />
                 <Button onClick={handleAddSubgoal} className="w-full gap-2">
                   <Plus className="h-4 w-4" />

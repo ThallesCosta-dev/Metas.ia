@@ -356,7 +356,9 @@ const initializeDatabase = async () => {
     return true;
   } catch (error: any) {
     console.warn("⚠️ Database initialization warning:", error.message);
-    console.warn("Tables may already exist or database connection is not ready yet");
+    console.warn(
+      "Tables may already exist or database connection is not ready yet",
+    );
     return false;
   } finally {
     if (connection) {

@@ -41,7 +41,8 @@ export function useAchievementsApi() {
       const data = await response.json();
       return data || [];
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch achievements";
+      const message =
+        err instanceof Error ? err.message : "Failed to fetch achievements";
       setError(message);
       console.error("getAchievements error:", err);
       return [];
@@ -64,7 +65,8 @@ export function useAchievementsApi() {
       const data = await response.json();
       return data;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to check achievements";
+      const message =
+        err instanceof Error ? err.message : "Failed to check achievements";
       setError(message);
       console.error("checkAndUnlockAchievements error:", err);
       return null;
@@ -87,7 +89,8 @@ export function useAchievementsApi() {
       const data = await response.json();
       return data;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch statistics";
+      const message =
+        err instanceof Error ? err.message : "Failed to fetch statistics";
       setError(message);
       console.error("getUserStatistics error:", err);
       return null;
@@ -110,7 +113,8 @@ export function useAchievementsApi() {
       const data = await response.json();
       return data;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to update statistics";
+      const message =
+        err instanceof Error ? err.message : "Failed to update statistics";
       setError(message);
       console.error("updateUserStatistics error:", err);
       return null;

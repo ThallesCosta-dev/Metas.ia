@@ -62,8 +62,12 @@ export default function Register() {
         {/* Form */}
         <div className="space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
-            <p className="text-muted-foreground">Join Metas and start achieving your goals</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Create Account
+            </h1>
+            <p className="text-muted-foreground">
+              Join Metas and start achieving your goals
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -74,7 +78,9 @@ export default function Register() {
                 type="text"
                 placeholder="John Doe"
                 value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, full_name: e.target.value })
+                }
                 required
               />
             </div>
@@ -86,7 +92,9 @@ export default function Register() {
                 type="text"
                 placeholder="johndoe"
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
                 required
               />
             </div>
@@ -98,7 +106,9 @@ export default function Register() {
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 required
               />
             </div>
@@ -110,11 +120,15 @@ export default function Register() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 required
                 minLength={6}
               />
-              <p className="text-xs text-muted-foreground mt-1">At least 6 characters</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                At least 6 characters
+              </p>
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
@@ -128,7 +142,9 @@ export default function Register() {
               <div className="w-full border-t border-border/40" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Already have an account?</span>
+              <span className="bg-background px-2 text-muted-foreground">
+                Already have an account?
+              </span>
             </div>
           </div>
 

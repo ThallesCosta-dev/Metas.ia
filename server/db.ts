@@ -13,14 +13,17 @@ const pool = mysql.createPool({
 });
 
 // Test the connection (non-blocking)
-pool.getConnection()
+pool
+  .getConnection()
   .then((connection) => {
     console.log("✅ Database connected successfully");
     connection.release();
   })
   .catch((err) => {
     console.warn("⚠️ Database connection failed:", err.message);
-    console.warn("Make sure your database is running and credentials are correct");
+    console.warn(
+      "Make sure your database is running and credentials are correct",
+    );
   });
 
 export default pool;

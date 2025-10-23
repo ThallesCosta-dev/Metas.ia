@@ -56,7 +56,8 @@ export function useTransactionsApi() {
         const data = await response.json();
         return data || [];
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to fetch transactions";
+        const message =
+          err instanceof Error ? err.message : "Failed to fetch transactions";
         setError(message);
         console.error("getTransactions error:", err);
         return [];
@@ -64,7 +65,7 @@ export function useTransactionsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const addTransaction = useCallback(
@@ -76,7 +77,7 @@ export function useTransactionsApi() {
         transaction_type: "deposit" | "withdrawal" | "adjustment";
         description?: string;
         transaction_date?: string;
-      }
+      },
     ): Promise<{ transactionId: number } | null> => {
       setLoading(true);
       setError(null);
@@ -92,7 +93,8 @@ export function useTransactionsApi() {
         const data = await response.json();
         return data;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to add transaction";
+        const message =
+          err instanceof Error ? err.message : "Failed to add transaction";
         setError(message);
         console.error("addTransaction error:", err);
         return null;
@@ -100,7 +102,7 @@ export function useTransactionsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const getCurrencyRates = useCallback(async () => {
@@ -119,7 +121,8 @@ export function useTransactionsApi() {
       const data = await response.json();
       return data;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch currency rates";
+      const message =
+        err instanceof Error ? err.message : "Failed to fetch currency rates";
       setError(message);
       console.error("getCurrencyRates error:", err);
       return null;

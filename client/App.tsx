@@ -42,7 +42,10 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
     <Route path="/login" element={<AuthRedirect component={<Login />} />} />
-    <Route path="/register" element={<AuthRedirect component={<Register />} />} />
+    <Route
+      path="/register"
+      element={<AuthRedirect component={<Register />} />}
+    />
     <Route
       path="/dashboard"
       element={

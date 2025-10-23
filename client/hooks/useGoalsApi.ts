@@ -1,6 +1,12 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Goal, GoalStatus, GoalCategory, PriorityLevel, Currency } from "@shared/api";
+import {
+  Goal,
+  GoalStatus,
+  GoalCategory,
+  PriorityLevel,
+  Currency,
+} from "@shared/api";
 
 export function useGoalsApi() {
   const { getToken } = useAuth();
@@ -41,7 +47,8 @@ export function useGoalsApi() {
       const data = await response.json();
       return data || [];
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch goals";
+      const message =
+        err instanceof Error ? err.message : "Failed to fetch goals";
       setError(message);
       console.error("getGoals error:", err);
       return [];
@@ -50,28 +57,32 @@ export function useGoalsApi() {
     }
   }, [getHeaders, handleError]);
 
-  const getGoal = useCallback(async (goalId: number | string): Promise<Goal | null> => {
-    setLoading(true);
-    setError(null);
+  const getGoal = useCallback(
+    async (goalId: number | string): Promise<Goal | null> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await fetch(`/api/goals/${goalId}`, {
-        method: "GET",
-        headers: getHeaders(),
-      });
+      try {
+        const response = await fetch(`/api/goals/${goalId}`, {
+          method: "GET",
+          headers: getHeaders(),
+        });
 
-      handleError(response);
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch goal";
-      setError(message);
-      console.error("getGoal error:", err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [getHeaders, handleError]);
+        handleError(response);
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to fetch goal";
+        setError(message);
+        console.error("getGoal error:", err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getHeaders, handleError],
+  );
 
   const createGoal = useCallback(
     async (goalData: {
@@ -99,7 +110,8 @@ export function useGoalsApi() {
         const data = await response.json();
         return data;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to create goal";
+        const message =
+          err instanceof Error ? err.message : "Failed to create goal";
         setError(message);
         console.error("createGoal error:", err);
         return null;
@@ -107,7 +119,7 @@ export function useGoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const updateGoal = useCallback(
@@ -124,7 +136,7 @@ export function useGoalsApi() {
         target_value: number;
         current_value: number;
         progress_percentage: number;
-      }>
+      }>,
     ): Promise<boolean> => {
       setLoading(true);
       setError(null);
@@ -139,7 +151,8 @@ export function useGoalsApi() {
         handleError(response);
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to update goal";
+        const message =
+          err instanceof Error ? err.message : "Failed to update goal";
         setError(message);
         console.error("updateGoal error:", err);
         return false;
@@ -147,7 +160,7 @@ export function useGoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const deleteGoal = useCallback(
@@ -164,7 +177,8 @@ export function useGoalsApi() {
         handleError(response);
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to delete goal";
+        const message =
+          err instanceof Error ? err.message : "Failed to delete goal";
         setError(message);
         console.error("deleteGoal error:", err);
         return false;
@@ -172,7 +186,7 @@ export function useGoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   return {

@@ -42,7 +42,8 @@ export function useSubgoalsApi() {
         const data = await response.json();
         return data || [];
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to fetch subgoals";
+        const message =
+          err instanceof Error ? err.message : "Failed to fetch subgoals";
         setError(message);
         console.error("getSubgoals error:", err);
         return [];
@@ -50,7 +51,7 @@ export function useSubgoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const createSubgoal = useCallback(
@@ -62,7 +63,7 @@ export function useSubgoalsApi() {
         due_date: string;
         target_value?: number;
         depends_on_subgoal_id?: number;
-      }
+      },
     ): Promise<{ subgoalId: number } | null> => {
       setLoading(true);
       setError(null);
@@ -78,7 +79,8 @@ export function useSubgoalsApi() {
         const data = await response.json();
         return data;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to create subgoal";
+        const message =
+          err instanceof Error ? err.message : "Failed to create subgoal";
         setError(message);
         console.error("createSubgoal error:", err);
         return null;
@@ -86,7 +88,7 @@ export function useSubgoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const updateSubgoal = useCallback(
@@ -99,22 +101,26 @@ export function useSubgoalsApi() {
         status: GoalStatus;
         due_date: string;
         current_value: number;
-      }>
+      }>,
     ): Promise<boolean> => {
       setLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`/api/goals/${goalId}/subgoals/${subgoalId}`, {
-          method: "PUT",
-          headers: getHeaders(),
-          body: JSON.stringify(updates),
-        });
+        const response = await fetch(
+          `/api/goals/${goalId}/subgoals/${subgoalId}`,
+          {
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify(updates),
+          },
+        );
 
         handleError(response);
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to update subgoal";
+        const message =
+          err instanceof Error ? err.message : "Failed to update subgoal";
         setError(message);
         console.error("updateSubgoal error:", err);
         return false;
@@ -122,24 +128,31 @@ export function useSubgoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   const deleteSubgoal = useCallback(
-    async (goalId: number | string, subgoalId: number | string): Promise<boolean> => {
+    async (
+      goalId: number | string,
+      subgoalId: number | string,
+    ): Promise<boolean> => {
       setLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`/api/goals/${goalId}/subgoals/${subgoalId}`, {
-          method: "DELETE",
-          headers: getHeaders(),
-        });
+        const response = await fetch(
+          `/api/goals/${goalId}/subgoals/${subgoalId}`,
+          {
+            method: "DELETE",
+            headers: getHeaders(),
+          },
+        );
 
         handleError(response);
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to delete subgoal";
+        const message =
+          err instanceof Error ? err.message : "Failed to delete subgoal";
         setError(message);
         console.error("deleteSubgoal error:", err);
         return false;
@@ -147,7 +160,7 @@ export function useSubgoalsApi() {
         setLoading(false);
       }
     },
-    [getHeaders, handleError]
+    [getHeaders, handleError],
   );
 
   return {

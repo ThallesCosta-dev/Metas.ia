@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { Plus, Filter, Search, Calendar, List, MoreVertical, Trophy } from "lucide-react";
+import {
+  Plus,
+  Filter,
+  Search,
+  Calendar,
+  List,
+  MoreVertical,
+  Trophy,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,12 +31,19 @@ export default function Dashboard() {
   const [showAchievements, setShowAchievements] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<GoalStatus | "all">("all");
-  const [filterCategory, setFilterCategory] = useState<GoalCategory | "all">("all");
-  const [filterPriority, setFilterPriority] = useState<PriorityLevel | "all">("all");
-  const [sortBy, setSortBy] = useState<"dueDate" | "priority" | "progress" | "created">("dueDate");
+  const [filterCategory, setFilterCategory] = useState<GoalCategory | "all">(
+    "all",
+  );
+  const [filterPriority, setFilterPriority] = useState<PriorityLevel | "all">(
+    "all",
+  );
+  const [sortBy, setSortBy] = useState<
+    "dueDate" | "priority" | "progress" | "created"
+  >("dueDate");
   const [goals, setGoals] = useState<Goal[]>([]);
 
-  const { getGoals, createGoal, updateGoal, deleteGoal, loading } = useGoalsApi();
+  const { getGoals, createGoal, updateGoal, deleteGoal, loading } =
+    useGoalsApi();
   const gamificationStats = useGamification(goals);
 
   // Load goals on mount
@@ -45,9 +60,12 @@ export default function Dashboard() {
     const matchesSearch =
       goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       goal.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === "all" || goal.status === filterStatus;
-    const matchesCategory = filterCategory === "all" || goal.category === filterCategory;
-    const matchesPriority = filterPriority === "all" || goal.priority === filterPriority;
+    const matchesStatus =
+      filterStatus === "all" || goal.status === filterStatus;
+    const matchesCategory =
+      filterCategory === "all" || goal.category === filterCategory;
+    const matchesPriority =
+      filterPriority === "all" || goal.priority === filterPriority;
 
     return matchesSearch && matchesStatus && matchesCategory && matchesPriority;
   });
@@ -82,7 +100,8 @@ export default function Dashboard() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">My Goals</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Level {gamificationStats.level} • {gamificationStats.totalPoints} pts • {goals.length} goals
+                Level {gamificationStats.level} •{" "}
+                {gamificationStats.totalPoints} pts • {goals.length} goals
               </p>
             </div>
             <div className="flex gap-2">
@@ -95,7 +114,11 @@ export default function Dashboard() {
                 <Trophy className="h-5 w-5" />
                 Achievements
               </Button>
-              <Button onClick={() => setShowCreateModal(true)} size="lg" className="gap-2">
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                size="lg"
+                className="gap-2"
+              >
                 <Plus className="h-5 w-5" />
                 New Goal
               </Button>
@@ -110,19 +133,27 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="p-6 rounded-lg border border-border/60 bg-card">
             <p className="text-sm text-muted-foreground mb-2">In Progress</p>
-            <p className="text-3xl font-bold text-primary">{statusCounts.in_progress}</p>
+            <p className="text-3xl font-bold text-primary">
+              {statusCounts.in_progress}
+            </p>
           </div>
           <div className="p-6 rounded-lg border border-border/60 bg-card">
             <p className="text-sm text-muted-foreground mb-2">Not Started</p>
-            <p className="text-3xl font-bold text-accent">{statusCounts.not_started}</p>
+            <p className="text-3xl font-bold text-accent">
+              {statusCounts.not_started}
+            </p>
           </div>
           <div className="p-6 rounded-lg border border-border/60 bg-card">
             <p className="text-sm text-muted-foreground mb-2">Completed</p>
-            <p className="text-3xl font-bold text-success">{statusCounts.completed}</p>
+            <p className="text-3xl font-bold text-success">
+              {statusCounts.completed}
+            </p>
           </div>
           <div className="p-6 rounded-lg border border-border/60 bg-card">
             <p className="text-sm text-muted-foreground mb-2">Delayed</p>
-            <p className="text-3xl font-bold text-destructive">{statusCounts.delayed}</p>
+            <p className="text-3xl font-bold text-destructive">
+              {statusCounts.delayed}
+            </p>
           </div>
         </div>
 
@@ -151,10 +182,14 @@ export default function Dashboard() {
                 <DropdownMenuItem onClick={() => setFilterStatus("all")}>
                   All Status
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus("in_progress")}>
+                <DropdownMenuItem
+                  onClick={() => setFilterStatus("in_progress")}
+                >
                   In Progress
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus("not_started")}>
+                <DropdownMenuItem
+                  onClick={() => setFilterStatus("not_started")}
+                >
                   Not Started
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setFilterStatus("completed")}>
@@ -236,8 +271,13 @@ export default function Dashboard() {
           <div className="space-y-4">
             {sortedGoals.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-lg text-muted-foreground mb-4">No goals found</p>
-                <Button onClick={() => setShowCreateModal(true)} className="gap-2">
+                <p className="text-lg text-muted-foreground mb-4">
+                  No goals found
+                </p>
+                <Button
+                  onClick={() => setShowCreateModal(true)}
+                  className="gap-2"
+                >
                   <Plus className="h-5 w-5" />
                   Create Your First Goal
                 </Button>
@@ -274,9 +314,7 @@ export default function Dashboard() {
         )}
 
         {/* Calendar View */}
-        {viewMode === "calendar" && (
-          <CalendarView goals={sortedGoals} />
-        )}
+        {viewMode === "calendar" && <CalendarView goals={sortedGoals} />}
       </main>
 
       {/* Achievements Panel */}
@@ -284,7 +322,10 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-foreground">Achievements</h2>
-            <Button variant="outline" onClick={() => setShowAchievements(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowAchievements(false)}
+            >
               Close
             </Button>
           </div>
