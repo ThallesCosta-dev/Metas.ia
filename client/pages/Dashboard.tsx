@@ -247,8 +247,26 @@ export default function Dashboard() {
                 <GoalCard
                   key={goal.id}
                   goal={goal}
-                  onUpdate={updateGoal}
-                  onDelete={deleteGoal}
+                  onUpdate={async (id, updates) => {
+                    const success = await updateGoal(id, updates);
+                    if (success) {
+                      const fetchedGoals = await getGoals();
+                      setGoals(fetchedGoals);
+                      toast.success("Goal updated successfully!");
+                    } else {
+                      toast.error("Failed to update goal");
+                    }
+                  }}
+                  onDelete={async (id) => {
+                    const success = await deleteGoal(id);
+                    if (success) {
+                      const fetchedGoals = await getGoals();
+                      setGoals(fetchedGoals);
+                      toast.success("Goal deleted successfully!");
+                    } else {
+                      toast.error("Failed to delete goal");
+                    }
+                  }}
                 />
               ))
             )}
