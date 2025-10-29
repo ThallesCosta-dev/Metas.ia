@@ -182,56 +182,91 @@ export const handleLogin: RequestHandler = async (req, res) => {
 };
 
 export const handleGetProfile: RequestHandler = async (req, res) => {
-  const connection = await pool.getConnection();
-  
   try {
     const userId = (req as any).userId;
-    
-    const [users] = await connection.execute(
-      `SELECT user_id, username, email, full_name, avatar_url, 
-              default_currency, timezone, language, theme, created_at, last_login
-       FROM users WHERE user_id = ?`,
-      [userId]
-    );
-    
-    const user = (users as any[])[0];
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+
+    // Return hardcoded admin profile
+    if (userId === 1) {
+      return res.json({
+        user_id: 1,
+        username: ADMIN_USERNAME,
+        email: ADMIN_EMAIL,
+        full_name: "Admin User",
+        avatar_url: null,
+        default_currency: "BRL",
+        timezone: "America/Sao_Paulo",
+        language: "pt-BR",
+        theme: "light",
+        created_at: new Date().toISOString(),
+        last_login: new Date().toISOString(),
+      });
     }
-    
-    res.json(user);
+
+    // Try database
+    let connection;
+    try {
+      connection = await pool.getConnection();
+
+      const [users] = await connection.execute(
+        `SELECT user_id, username, email, full_name, avatar_url,
+                default_currency, timezone, language, theme, created_at, last_login
+         FROM users WHERE user_id = ?`,
+        [userId]
+      );
+
+      const user = (users as any[])[0];
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(user);
+    } finally {
+      if (connection) {
+        connection.release();
+      }
+    }
   } catch (error) {
     console.error("Get profile error:", error);
     res.status(500).json({ error: "Failed to get profile" });
-  } finally {
-    connection.release();
   }
 };
 
 export const handleUpdateProfile: RequestHandler = async (req, res) => {
-  const connection = await pool.getConnection();
-  
   try {
     const userId = (req as any).userId;
-    const { full_name, avatar_url, default_currency, timezone, language, theme } = req.body;
-    
-    await connection.execute(
-      `UPDATE users 
-       SET full_name = COALESCE(?, full_name),
-           avatar_url = COALESCE(?, avatar_url),
-           default_currency = COALESCE(?, default_currency),
-           timezone = COALESCE(?, timezone),
-           language = COALESCE(?, language),
-           theme = COALESCE(?, theme)
-       WHERE user_id = ?`,
-      [full_name, avatar_url, default_currency, timezone, language, theme, userId]
-    );
-    
-    res.json({ message: "Profile updated successfully" });
+
+    // Admin profile is read-only
+    if (userId === 1) {
+      return res.json({ message: "Admin profile cannot be updated" });
+    }
+
+    // Try database
+    let connection;
+    try {
+      connection = await pool.getConnection();
+
+      const { full_name, avatar_url, default_currency, timezone, language, theme } = req.body;
+
+      await connection.execute(
+        `UPDATE users
+         SET full_name = COALESCE(?, full_name),
+             avatar_url = COALESCE(?, avatar_url),
+             default_currency = COALESCE(?, default_currency),
+             timezone = COALESCE(?, timezone),
+             language = COALESCE(?, language),
+             theme = COALESCE(?, theme)
+         WHERE user_id = ?`,
+        [full_name, avatar_url, default_currency, timezone, language, theme, userId]
+      );
+
+      res.json({ message: "Profile updated successfully" });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
+    }
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(500).json({ error: "Failed to update profile" });
-  } finally {
-    connection.release();
   }
 };
