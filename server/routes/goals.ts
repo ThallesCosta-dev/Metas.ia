@@ -3,35 +3,45 @@ import pool from "../db";
 import { AuthRequest } from "../middleware/auth";
 
 export const handleGetGoals: RequestHandler = async (req: AuthRequest, res) => {
-  const connection = await pool.getConnection();
-  
   try {
     const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const [goals] = await connection.execute(
-      `SELECT 
-        g.*,
-        COUNT(DISTINCT s.subgoal_id) AS total_subgoals,
-        COUNT(DISTINCT CASE WHEN s.status = 'completed' THEN s.subgoal_id END) AS completed_subgoals,
-        COALESCE(SUM(DISTINCT ft.amount), 0) AS total_contributed
-      FROM goals g
-      LEFT JOIN subgoals s ON g.goal_id = s.goal_id
-      LEFT JOIN financial_transactions ft ON g.goal_id = ft.goal_id AND ft.transaction_type = 'deposit'
-      WHERE g.user_id = ?
-      GROUP BY g.goal_id
-      ORDER BY g.due_date ASC`,
-      [userId]
-    );
+    // Return empty array for admin user without database
+    if (userId === 1) {
+      return res.json([]);
+    }
 
-    res.json(goals);
+    let connection;
+    try {
+      connection = await pool.getConnection();
+
+      const [goals] = await connection.execute(
+        `SELECT
+          g.*,
+          COUNT(DISTINCT s.subgoal_id) AS total_subgoals,
+          COUNT(DISTINCT CASE WHEN s.status = 'completed' THEN s.subgoal_id END) AS completed_subgoals,
+          COALESCE(SUM(DISTINCT ft.amount), 0) AS total_contributed
+        FROM goals g
+        LEFT JOIN subgoals s ON g.goal_id = s.goal_id
+        LEFT JOIN financial_transactions ft ON g.goal_id = ft.goal_id AND ft.transaction_type = 'deposit'
+        WHERE g.user_id = ?
+        GROUP BY g.goal_id
+        ORDER BY g.due_date ASC`,
+        [userId]
+      );
+
+      res.json(goals);
+    } finally {
+      if (connection) {
+        connection.release();
+      }
+    }
   } catch (error) {
     console.error("Get goals error:", error);
     res.status(500).json({ error: "Failed to fetch goals" });
-  } finally {
-    connection.release();
   }
 };
 
