@@ -2,7 +2,10 @@ import { RequestHandler } from "express";
 import pool from "../db";
 import { AuthRequest } from "../middleware/auth";
 
-export const handleGetAchievements: RequestHandler = async (req: AuthRequest, res) => {
+export const handleGetAchievements: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const userId = req.userId;
 
@@ -13,14 +16,94 @@ export const handleGetAchievements: RequestHandler = async (req: AuthRequest, re
     // Return default achievements for admin user without database
     if (userId === 1) {
       const defaultAchievements = [
-        { achievement_id: 1, code: "first_goal", name: "Primeira Meta", description: "Criou sua primeira meta", icon: "🎯", points: 10, category: "beginner", unlocked: 0, unlocked_at: null },
-        { achievement_id: 2, code: "goal_master", name: "Mestre das Metas", description: "Completou 10 metas", icon: "👑", points: 100, category: "completion", unlocked: 0, unlocked_at: null },
-        { achievement_id: 3, code: "streak_7", name: "Semana Produtiva", description: "Manteve 7 dias de sequência", icon: "🔥", points: 50, category: "consistency", unlocked: 0, unlocked_at: null },
-        { achievement_id: 4, code: "financial_saver", name: "Poupador", description: "Economizou R$ 1000", icon: "💰", points: 75, category: "financial", unlocked: 0, unlocked_at: null },
-        { achievement_id: 5, code: "speed_demon", name: "Velocista", description: "Completou uma meta antes do prazo", icon: "⚡", points: 25, category: "efficiency", unlocked: 0, unlocked_at: null },
-        { achievement_id: 6, code: "ambitious", name: "Ambicioso", description: "Criou 5 metas", icon: "🚀", points: 30, category: "beginner", unlocked: 0, unlocked_at: null },
-        { achievement_id: 7, code: "polymath", name: "Polímata", description: "Criou metas em todas as categorias", icon: "🌟", points: 80, category: "completion", unlocked: 0, unlocked_at: null },
-        { achievement_id: 8, code: "unstoppable", name: "Imparável", description: "Manteve 30 dias de sequência", icon: "⚡⚡", points: 150, category: "consistency", unlocked: 0, unlocked_at: null },
+        {
+          achievement_id: 1,
+          code: "first_goal",
+          name: "Primeira Meta",
+          description: "Criou sua primeira meta",
+          icon: "🎯",
+          points: 10,
+          category: "beginner",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 2,
+          code: "goal_master",
+          name: "Mestre das Metas",
+          description: "Completou 10 metas",
+          icon: "👑",
+          points: 100,
+          category: "completion",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 3,
+          code: "streak_7",
+          name: "Semana Produtiva",
+          description: "Manteve 7 dias de sequência",
+          icon: "🔥",
+          points: 50,
+          category: "consistency",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 4,
+          code: "financial_saver",
+          name: "Poupador",
+          description: "Economizou R$ 1000",
+          icon: "💰",
+          points: 75,
+          category: "financial",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 5,
+          code: "speed_demon",
+          name: "Velocista",
+          description: "Completou uma meta antes do prazo",
+          icon: "⚡",
+          points: 25,
+          category: "efficiency",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 6,
+          code: "ambitious",
+          name: "Ambicioso",
+          description: "Criou 5 metas",
+          icon: "🚀",
+          points: 30,
+          category: "beginner",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 7,
+          code: "polymath",
+          name: "Polímata",
+          description: "Criou metas em todas as categorias",
+          icon: "🌟",
+          points: 80,
+          category: "completion",
+          unlocked: 0,
+          unlocked_at: null,
+        },
+        {
+          achievement_id: 8,
+          code: "unstoppable",
+          name: "Imparável",
+          description: "Manteve 30 dias de sequência",
+          icon: "⚡⚡",
+          points: 150,
+          category: "consistency",
+          unlocked: 0,
+          unlocked_at: null,
+        },
       ];
       return res.json(defaultAchievements);
     }
@@ -44,7 +127,7 @@ export const handleGetAchievements: RequestHandler = async (req: AuthRequest, re
         FROM achievements a
         LEFT JOIN user_achievements ua ON a.achievement_id = ua.achievement_id AND ua.user_id = ?
         ORDER BY a.category, a.name`,
-        [userId]
+        [userId],
       );
 
       res.json(achievements);
@@ -59,7 +142,10 @@ export const handleGetAchievements: RequestHandler = async (req: AuthRequest, re
   }
 };
 
-export const handleGetUserStatistics: RequestHandler = async (req: AuthRequest, res) => {
+export const handleGetUserStatistics: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const userId = req.userId;
 
@@ -88,7 +174,7 @@ export const handleGetUserStatistics: RequestHandler = async (req: AuthRequest, 
 
       const [stats] = await connection.execute(
         `SELECT * FROM user_statistics WHERE user_id = ?`,
-        [userId]
+        [userId],
       );
 
       const statRecord = (stats as any[])[0];
@@ -96,12 +182,12 @@ export const handleGetUserStatistics: RequestHandler = async (req: AuthRequest, 
         // Create default stats if not exists
         await connection.execute(
           "INSERT INTO user_statistics (user_id) VALUES (?)",
-          [userId]
+          [userId],
         );
 
         const [newStats] = await connection.execute(
           "SELECT * FROM user_statistics WHERE user_id = ?",
-          [userId]
+          [userId],
         );
 
         return res.json((newStats as any[])[0]);
@@ -119,7 +205,10 @@ export const handleGetUserStatistics: RequestHandler = async (req: AuthRequest, 
   }
 };
 
-export const handleUpdateUserStatistics: RequestHandler = async (req: AuthRequest, res) => {
+export const handleUpdateUserStatistics: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const userId = req.userId;
 
@@ -139,7 +228,7 @@ export const handleUpdateUserStatistics: RequestHandler = async (req: AuthReques
       // Recalculate statistics from data
       const [goals] = await connection.execute(
         "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM goals WHERE user_id = ?",
-        [userId]
+        [userId],
       );
 
       const goalStats = (goals as any[])[0];
@@ -148,7 +237,7 @@ export const handleUpdateUserStatistics: RequestHandler = async (req: AuthReques
 
       const [achievements] = await connection.execute(
         "SELECT COUNT(*) * 10 as total_points FROM user_achievements WHERE user_id = ?",
-        [userId]
+        [userId],
       );
 
       const achievementStats = (achievements as any[])[0];
@@ -156,7 +245,7 @@ export const handleUpdateUserStatistics: RequestHandler = async (req: AuthReques
 
       const [transactions] = await connection.execute(
         "SELECT COALESCE(SUM(amount), 0) as total FROM financial_transactions WHERE user_id = ? AND transaction_type = 'deposit'",
-        [userId]
+        [userId],
       );
 
       const transactionStats = (transactions as any[])[0];
@@ -170,7 +259,7 @@ export const handleUpdateUserStatistics: RequestHandler = async (req: AuthReques
              total_points = ?,
              total_saved_amount = ?
          WHERE user_id = ?`,
-        [totalGoals, completedGoals, totalPoints, totalSaved, userId]
+        [totalGoals, completedGoals, totalPoints, totalSaved, userId],
       );
 
       res.json({ message: "Statistics updated successfully" });
@@ -185,7 +274,10 @@ export const handleUpdateUserStatistics: RequestHandler = async (req: AuthReques
   }
 };
 
-export const handleCheckAndUnlockAchievements: RequestHandler = async (req: AuthRequest, res) => {
+export const handleCheckAndUnlockAchievements: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const userId = req.userId;
 
@@ -195,7 +287,10 @@ export const handleCheckAndUnlockAchievements: RequestHandler = async (req: Auth
 
     // Return success for admin user without database
     if (userId === 1) {
-      return res.json({ unlockedAchievements: [], message: "Unlocked 0 new achievements" });
+      return res.json({
+        unlockedAchievements: [],
+        message: "Unlocked 0 new achievements",
+      });
     }
 
     let connection;
@@ -205,17 +300,17 @@ export const handleCheckAndUnlockAchievements: RequestHandler = async (req: Auth
       // Check for achievement conditions
       const [goals] = await connection.execute(
         "SELECT COUNT(*) as total FROM goals WHERE user_id = ?",
-        [userId]
+        [userId],
       );
 
       const [completedGoals] = await connection.execute(
         "SELECT COUNT(*) as total FROM goals WHERE user_id = ? AND status = 'completed'",
-        [userId]
+        [userId],
       );
 
       const [financialGoals] = await connection.execute(
         "SELECT COUNT(*) as total FROM goals WHERE user_id = ? AND is_financial = 1 AND status = 'completed'",
-        [userId]
+        [userId],
       );
 
       const totalGoals = (goals as any[])[0].total;
@@ -237,21 +332,21 @@ export const handleCheckAndUnlockAchievements: RequestHandler = async (req: Auth
           const [existing] = await connection.execute(
             `SELECT user_achievement_id FROM user_achievements
              WHERE user_id = ? AND achievement_id = (SELECT achievement_id FROM achievements WHERE code = ?)`,
-            [userId, achievement.code]
+            [userId, achievement.code],
           );
 
           if ((existing as any[]).length === 0) {
             // Unlock achievement
             const [achievementData] = await connection.execute(
               "SELECT achievement_id FROM achievements WHERE code = ?",
-              [achievement.code]
+              [achievement.code],
             );
 
             const achievementId = (achievementData as any[])[0]?.achievement_id;
             if (achievementId) {
               await connection.execute(
                 "INSERT INTO user_achievements (user_id, achievement_id) VALUES (?, ?)",
-                [userId, achievementId]
+                [userId, achievementId],
               );
 
               unlockedAchievements.push(achievement.code);
@@ -260,7 +355,10 @@ export const handleCheckAndUnlockAchievements: RequestHandler = async (req: Auth
         }
       }
 
-      res.json({ unlockedAchievements, message: `Unlocked ${unlockedAchievements.length} new achievements` });
+      res.json({
+        unlockedAchievements,
+        message: `Unlocked ${unlockedAchievements.length} new achievements`,
+      });
     } finally {
       if (connection) {
         connection.release();

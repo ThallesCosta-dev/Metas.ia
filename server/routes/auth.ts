@@ -35,10 +35,7 @@ export const handleRegister: RequestHandler = async (req, res) => {
     const data = registerSchema.parse(req.body);
 
     // Check for admin credentials registration
-    if (
-      data.username === ADMIN_USERNAME &&
-      data.password === ADMIN_PASSWORD
-    ) {
+    if (data.username === ADMIN_USERNAME && data.password === ADMIN_PASSWORD) {
       const token = createToken(1, ADMIN_EMAIL);
       return res.status(201).json({
         message: "User registered successfully",
@@ -55,7 +52,7 @@ export const handleRegister: RequestHandler = async (req, res) => {
       // Check if user exists
       const [existing] = await connection.execute(
         "SELECT user_id FROM users WHERE email = ? OR username = ?",
-        [data.email || data.username, data.username]
+        [data.email || data.username, data.username],
       );
 
       if ((existing as any[]).length > 0) {
@@ -69,7 +66,12 @@ export const handleRegister: RequestHandler = async (req, res) => {
       const [result] = await connection.execute(
         `INSERT INTO users (username, email, password_hash, full_name)
          VALUES (?, ?, ?, ?)`,
-        [data.username, data.email || data.username, password_hash, data.full_name || data.username]
+        [
+          data.username,
+          data.email || data.username,
+          password_hash,
+          data.full_name || data.username,
+        ],
       );
 
       const userId = (result as any).insertId;
@@ -77,7 +79,7 @@ export const handleRegister: RequestHandler = async (req, res) => {
       // Create user statistics record
       await connection.execute(
         `INSERT INTO user_statistics (user_id) VALUES (?)`,
-        [userId]
+        [userId],
       );
 
       // Generate token
@@ -93,7 +95,10 @@ export const handleRegister: RequestHandler = async (req, res) => {
       // If database fails, allow registration without it for now
       res.status(201).json({
         message: "User registered successfully",
-        token: createToken(Math.floor(Math.random() * 10000), data.email || data.username),
+        token: createToken(
+          Math.floor(Math.random() * 10000),
+          data.email || data.username,
+        ),
         user: { userId: 1, username: data.username, email: data.email },
       });
     } finally {
@@ -134,7 +139,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
       // Find user
       const [users] = await connection.execute(
         "SELECT user_id, username, email, password_hash FROM users WHERE email = ?",
-        [data.email]
+        [data.email],
       );
 
       const user = (users as any[])[0];
@@ -143,7 +148,10 @@ export const handleLogin: RequestHandler = async (req, res) => {
       }
 
       // Verify password
-      const validPassword = await bcrypt.compare(data.password, user.password_hash);
+      const validPassword = await bcrypt.compare(
+        data.password,
+        user.password_hash,
+      );
       if (!validPassword) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
@@ -151,7 +159,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
       // Update last login
       await connection.execute(
         "UPDATE users SET last_login = NOW() WHERE user_id = ?",
-        [user.user_id]
+        [user.user_id],
       );
 
       // Generate token
@@ -160,7 +168,11 @@ export const handleLogin: RequestHandler = async (req, res) => {
       res.json({
         message: "Login successful",
         token,
-        user: { userId: user.user_id, username: user.username, email: user.email },
+        user: {
+          userId: user.user_id,
+          username: user.username,
+          email: user.email,
+        },
       });
     } catch (dbError: any) {
       console.warn("Database login failed:", dbError.message);
@@ -211,7 +223,7 @@ export const handleGetProfile: RequestHandler = async (req, res) => {
         `SELECT user_id, username, email, full_name, avatar_url,
                 default_currency, timezone, language, theme, created_at, last_login
          FROM users WHERE user_id = ?`,
-        [userId]
+        [userId],
       );
 
       const user = (users as any[])[0];
@@ -245,7 +257,14 @@ export const handleUpdateProfile: RequestHandler = async (req, res) => {
     try {
       connection = await pool.getConnection();
 
-      const { full_name, avatar_url, default_currency, timezone, language, theme } = req.body;
+      const {
+        full_name,
+        avatar_url,
+        default_currency,
+        timezone,
+        language,
+        theme,
+      } = req.body;
 
       await connection.execute(
         `UPDATE users
@@ -256,7 +275,15 @@ export const handleUpdateProfile: RequestHandler = async (req, res) => {
              language = COALESCE(?, language),
              theme = COALESCE(?, theme)
          WHERE user_id = ?`,
-        [full_name, avatar_url, default_currency, timezone, language, theme, userId]
+        [
+          full_name,
+          avatar_url,
+          default_currency,
+          timezone,
+          language,
+          theme,
+          userId,
+        ],
       );
 
       res.json({ message: "Profile updated successfully" });

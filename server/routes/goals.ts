@@ -30,7 +30,7 @@ export const handleGetGoals: RequestHandler = async (req: AuthRequest, res) => {
         WHERE g.user_id = ?
         GROUP BY g.goal_id
         ORDER BY g.due_date ASC`,
-        [userId]
+        [userId],
       );
 
       res.json(goals);
@@ -65,7 +65,7 @@ export const handleGetGoal: RequestHandler = async (req: AuthRequest, res) => {
 
       const [goals] = await connection.execute(
         "SELECT * FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       const goal = (goals as any[])[0];
@@ -75,12 +75,12 @@ export const handleGetGoal: RequestHandler = async (req: AuthRequest, res) => {
 
       const [subgoals] = await connection.execute(
         "SELECT * FROM subgoals WHERE goal_id = ? ORDER BY position",
-        [goalId]
+        [goalId],
       );
 
       const [transactions] = await connection.execute(
         "SELECT * FROM financial_transactions WHERE goal_id = ? ORDER BY transaction_date DESC",
-        [goalId]
+        [goalId],
       );
 
       res.json({ ...goal, subgoals, transactions });
@@ -95,7 +95,10 @@ export const handleGetGoal: RequestHandler = async (req: AuthRequest, res) => {
   }
 };
 
-export const handleCreateGoal: RequestHandler = async (req: AuthRequest, res) => {
+export const handleCreateGoal: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const userId = req.userId;
     if (!userId) {
@@ -121,7 +124,9 @@ export const handleCreateGoal: RequestHandler = async (req: AuthRequest, res) =>
     // Return success with fake ID for admin user without database
     if (userId === 1) {
       const goalId = Math.floor(Math.random() * 100000);
-      return res.status(201).json({ goalId, message: "Goal created successfully" });
+      return res
+        .status(201)
+        .json({ goalId, message: "Goal created successfully" });
     }
 
     let connection;
@@ -143,7 +148,7 @@ export const handleCreateGoal: RequestHandler = async (req: AuthRequest, res) =>
           is_financial ? 1 : 0,
           target_value || null,
           currency || null,
-        ]
+        ],
       );
 
       const goalId = (result as any).insertId;
@@ -152,7 +157,7 @@ export const handleCreateGoal: RequestHandler = async (req: AuthRequest, res) =>
       await connection.execute(
         `INSERT INTO activity_log (user_id, goal_id, action_type, description)
          VALUES (?, ?, 'goal_created', ?)`,
-        [userId, goalId, `Created goal: ${title}`]
+        [userId, goalId, `Created goal: ${title}`],
       );
 
       res.status(201).json({ goalId, message: "Goal created successfully" });
@@ -167,7 +172,10 @@ export const handleCreateGoal: RequestHandler = async (req: AuthRequest, res) =>
   }
 };
 
-export const handleUpdateGoal: RequestHandler = async (req: AuthRequest, res) => {
+export const handleUpdateGoal: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId } = req.params;
     const userId = req.userId;
@@ -188,7 +196,7 @@ export const handleUpdateGoal: RequestHandler = async (req: AuthRequest, res) =>
       // Verify goal ownership
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -235,14 +243,14 @@ export const handleUpdateGoal: RequestHandler = async (req: AuthRequest, res) =>
           progress_percentage,
           status,
           goalId,
-        ]
+        ],
       );
 
       // Log activity
       await connection.execute(
         `INSERT INTO activity_log (user_id, goal_id, action_type, description)
          VALUES (?, ?, 'goal_updated', ?)`,
-        [userId, goalId, `Updated goal${status ? ` to ${status}` : ""}`]
+        [userId, goalId, `Updated goal${status ? ` to ${status}` : ""}`],
       );
 
       res.json({ message: "Goal updated successfully" });
@@ -257,7 +265,10 @@ export const handleUpdateGoal: RequestHandler = async (req: AuthRequest, res) =>
   }
 };
 
-export const handleDeleteGoal: RequestHandler = async (req: AuthRequest, res) => {
+export const handleDeleteGoal: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId } = req.params;
     const userId = req.userId;
@@ -278,7 +289,7 @@ export const handleDeleteGoal: RequestHandler = async (req: AuthRequest, res) =>
       // Verify goal ownership
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -291,7 +302,7 @@ export const handleDeleteGoal: RequestHandler = async (req: AuthRequest, res) =>
       await connection.execute(
         `INSERT INTO activity_log (user_id, goal_id, action_type, description)
          VALUES (?, ?, 'goal_deleted', ?)`,
-        [userId, goalId, "Deleted goal"]
+        [userId, goalId, "Deleted goal"],
       );
 
       res.json({ message: "Goal deleted successfully" });

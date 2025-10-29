@@ -2,7 +2,10 @@ import { RequestHandler } from "express";
 import pool from "../db";
 import { AuthRequest } from "../middleware/auth";
 
-export const handleGetSubgoals: RequestHandler = async (req: AuthRequest, res) => {
+export const handleGetSubgoals: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId } = req.params;
     const userId = req.userId;
@@ -23,7 +26,7 @@ export const handleGetSubgoals: RequestHandler = async (req: AuthRequest, res) =
       // Verify user owns the goal
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -32,7 +35,7 @@ export const handleGetSubgoals: RequestHandler = async (req: AuthRequest, res) =
 
       const [subgoals] = await connection.execute(
         "SELECT * FROM subgoals WHERE goal_id = ? ORDER BY position",
-        [goalId]
+        [goalId],
       );
 
       res.json(subgoals);
@@ -47,7 +50,10 @@ export const handleGetSubgoals: RequestHandler = async (req: AuthRequest, res) =
   }
 };
 
-export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res) => {
+export const handleCreateSubgoal: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId } = req.params;
     const userId = req.userId;
@@ -56,7 +62,13 @@ export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res)
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { title, description, due_date, target_value, depends_on_subgoal_id } = req.body;
+    const {
+      title,
+      description,
+      due_date,
+      target_value,
+      depends_on_subgoal_id,
+    } = req.body;
 
     if (!title || !due_date) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -65,7 +77,9 @@ export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res)
     // Return success with fake ID for admin user without database
     if (userId === 1) {
       const subgoalId = Math.floor(Math.random() * 100000);
-      return res.status(201).json({ subgoalId, message: "Subgoal created successfully" });
+      return res
+        .status(201)
+        .json({ subgoalId, message: "Subgoal created successfully" });
     }
 
     let connection;
@@ -75,7 +89,7 @@ export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res)
       // Verify goal ownership
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -85,7 +99,7 @@ export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res)
       // Get max position
       const [positions] = await connection.execute(
         "SELECT MAX(position) as max_position FROM subgoals WHERE goal_id = ?",
-        [goalId]
+        [goalId],
       );
 
       const nextPosition = ((positions as any[])[0]?.max_position || 0) + 1;
@@ -94,12 +108,22 @@ export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res)
         `INSERT INTO subgoals
          (goal_id, title, description, due_date, target_value, depends_on_subgoal_id, position, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, 'not_started')`,
-        [goalId, title, description, due_date, target_value || null, depends_on_subgoal_id || null, nextPosition]
+        [
+          goalId,
+          title,
+          description,
+          due_date,
+          target_value || null,
+          depends_on_subgoal_id || null,
+          nextPosition,
+        ],
       );
 
       const subgoalId = (result as any).insertId;
 
-      res.status(201).json({ subgoalId, message: "Subgoal created successfully" });
+      res
+        .status(201)
+        .json({ subgoalId, message: "Subgoal created successfully" });
     } finally {
       if (connection) {
         connection.release();
@@ -111,7 +135,10 @@ export const handleCreateSubgoal: RequestHandler = async (req: AuthRequest, res)
   }
 };
 
-export const handleUpdateSubgoal: RequestHandler = async (req: AuthRequest, res) => {
+export const handleUpdateSubgoal: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId, subgoalId } = req.params;
     const userId = req.userId;
@@ -132,7 +159,7 @@ export const handleUpdateSubgoal: RequestHandler = async (req: AuthRequest, res)
       // Verify goal ownership
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -150,7 +177,16 @@ export const handleUpdateSubgoal: RequestHandler = async (req: AuthRequest, res)
              current_value = COALESCE(?, current_value),
              completed_at = CASE WHEN ? = 'completed' THEN NOW() ELSE completed_at END
          WHERE subgoal_id = ? AND goal_id = ?`,
-        [title, description, status, due_date, current_value, status, subgoalId, goalId]
+        [
+          title,
+          description,
+          status,
+          due_date,
+          current_value,
+          status,
+          subgoalId,
+          goalId,
+        ],
       );
 
       res.json({ message: "Subgoal updated successfully" });
@@ -165,7 +201,10 @@ export const handleUpdateSubgoal: RequestHandler = async (req: AuthRequest, res)
   }
 };
 
-export const handleDeleteSubgoal: RequestHandler = async (req: AuthRequest, res) => {
+export const handleDeleteSubgoal: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId, subgoalId } = req.params;
     const userId = req.userId;
@@ -186,7 +225,7 @@ export const handleDeleteSubgoal: RequestHandler = async (req: AuthRequest, res)
       // Verify goal ownership
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -195,7 +234,7 @@ export const handleDeleteSubgoal: RequestHandler = async (req: AuthRequest, res)
 
       await connection.execute(
         "DELETE FROM subgoals WHERE subgoal_id = ? AND goal_id = ?",
-        [subgoalId, goalId]
+        [subgoalId, goalId],
       );
 
       res.json({ message: "Subgoal deleted successfully" });

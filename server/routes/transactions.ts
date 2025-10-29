@@ -2,7 +2,10 @@ import { RequestHandler } from "express";
 import pool from "../db";
 import { AuthRequest } from "../middleware/auth";
 
-export const handleGetTransactions: RequestHandler = async (req: AuthRequest, res) => {
+export const handleGetTransactions: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId } = req.params;
     const userId = req.userId;
@@ -23,7 +26,7 @@ export const handleGetTransactions: RequestHandler = async (req: AuthRequest, re
       // Verify user owns the goal
       const [goals] = await connection.execute(
         "SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       if ((goals as any[]).length === 0) {
@@ -34,7 +37,7 @@ export const handleGetTransactions: RequestHandler = async (req: AuthRequest, re
         `SELECT * FROM financial_transactions
          WHERE goal_id = ?
          ORDER BY transaction_date DESC`,
-        [goalId]
+        [goalId],
       );
 
       res.json(transactions);
@@ -49,7 +52,10 @@ export const handleGetTransactions: RequestHandler = async (req: AuthRequest, re
   }
 };
 
-export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res) => {
+export const handleAddTransaction: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
   try {
     const { goalId } = req.params;
     const userId = req.userId;
@@ -58,7 +64,13 @@ export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { amount, currency, transaction_type, description, transaction_date } = req.body;
+    const {
+      amount,
+      currency,
+      transaction_type,
+      description,
+      transaction_date,
+    } = req.body;
 
     if (!amount || !currency) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -67,7 +79,9 @@ export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res
     // Return success with fake ID for admin user without database
     if (userId === 1) {
       const transactionId = Math.floor(Math.random() * 100000);
-      return res.status(201).json({ transactionId, message: "Transaction created successfully" });
+      return res
+        .status(201)
+        .json({ transactionId, message: "Transaction created successfully" });
     }
 
     let connection;
@@ -77,7 +91,7 @@ export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res
       // Verify goal ownership
       const [goals] = await connection.execute(
         "SELECT goal_id, current_value, currency as goal_currency FROM goals WHERE goal_id = ? AND user_id = ?",
-        [goalId, userId]
+        [goalId, userId],
       );
 
       const goal = (goals as any[])[0];
@@ -93,7 +107,7 @@ export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res
         const [rates] = await connection.execute(
           `SELECT rate FROM currency_rates
            WHERE from_currency = ? AND to_currency = ?`,
-          [currency, goal.goal_currency]
+          [currency, goal.goal_currency],
         );
 
         const rate = (rates as any[])[0];
@@ -118,7 +132,7 @@ export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res
           transaction_type || "deposit",
           description,
           transaction_date || new Date().toISOString().split("T")[0],
-        ]
+        ],
       );
 
       const transactionId = (result as any).insertId;
@@ -128,11 +142,13 @@ export const handleAddTransaction: RequestHandler = async (req: AuthRequest, res
         const newValue = goal.current_value + convertedAmount;
         await connection.execute(
           "UPDATE goals SET current_value = ? WHERE goal_id = ?",
-          [newValue, goalId]
+          [newValue, goalId],
         );
       }
 
-      res.status(201).json({ transactionId, message: "Transaction created successfully" });
+      res
+        .status(201)
+        .json({ transactionId, message: "Transaction created successfully" });
     } finally {
       if (connection) {
         connection.release();
@@ -151,7 +167,7 @@ export const handleGetCurrencyRates: RequestHandler = async (req, res) => {
 
     const [rates] = await connection.execute(
       `SELECT from_currency, to_currency, rate FROM currency_rates
-       ORDER BY from_currency, to_currency`
+       ORDER BY from_currency, to_currency`,
     );
 
     res.json(rates);
@@ -191,7 +207,7 @@ export const handleUpdateCurrencyRate: RequestHandler = async (req, res) => {
       `INSERT INTO currency_rates (from_currency, to_currency, rate)
        VALUES (?, ?, ?)
        ON DUPLICATE KEY UPDATE rate = ?`,
-      [from_currency, to_currency, rate, rate]
+      [from_currency, to_currency, rate, rate],
     );
 
     res.json({ message: "Currency rate updated successfully" });
