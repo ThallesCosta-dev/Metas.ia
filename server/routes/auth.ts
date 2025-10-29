@@ -7,8 +7,8 @@ import { z } from "zod";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Hardcoded admin credentials
-const ADMIN_EMAIL = "admin";
-const ADMIN_PASSWORD = "admin";
+const ADMIN_EMAIL = "admin@a";
+const ADMIN_PASSWORD = "a";
 const ADMIN_USERNAME = "admin";
 
 const registerSchema = z.object({
