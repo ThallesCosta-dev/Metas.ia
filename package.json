@@ -21,6 +21,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.77.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",

@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import initializeDatabase from "./db-init";
 import { authMiddleware } from "./middleware/auth";
 import { handleDemo } from "./routes/demo";
 import { handleCurrencyConversion, handleGetExchangeRates } from "./routes/currency";
@@ -13,14 +12,6 @@ import { handleGetAchievements, handleGetUserStatistics, handleUpdateUserStatist
 
 export async function createServer() {
   const app = express();
-
-  // Initialize database on startup
-  try {
-    await initializeDatabase();
-  } catch (error) {
-    console.error("Failed to initialize database:", error);
-    // Continue anyway, tables might already exist
-  }
 
   // Middleware
   app.use(cors());

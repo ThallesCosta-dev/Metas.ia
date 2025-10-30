@@ -1,15 +1,6 @@
 import { RequestHandler } from "express";
-import pool from "../db";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import supabase from "../supabase";
 import { z } from "zod";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-
-// Hardcoded admin credentials
-const ADMIN_EMAIL = "admin@admin";
-const ADMIN_PASSWORD = "admin123";
-const ADMIN_USERNAME = "admin";
 
 const registerSchema = z.object({
   username: z.string().min(3).max(50),
@@ -23,89 +14,47 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
-// Helper function to create JWT token
-const createToken = (userId: number, email: string) => {
-  return jwt.sign({ userId, email }, JWT_SECRET, {
-    expiresIn: "7d",
-  });
-};
 
 export const handleRegister: RequestHandler = async (req, res) => {
   try {
     const data = registerSchema.parse(req.body);
 
-    // Check for admin credentials registration
-    if (data.username === ADMIN_USERNAME && data.password === ADMIN_PASSWORD) {
-      const token = createToken(1, ADMIN_EMAIL);
-      return res.status(201).json({
-        message: "User registered successfully",
-        token,
-        user: { userId: 1, username: ADMIN_USERNAME, email: ADMIN_EMAIL },
-      });
+    // Check if user exists
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id")
+      .or(`email.eq.${data.email || data.username},username.eq.${data.username}`)
+      .maybeSingle();
+
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
     }
 
-    // Try database registration
-    let connection;
-    try {
-      connection = await pool.getConnection();
+    // Create user in users table
+    const { data: newUser, error: userError } = await supabase
+      .from("users")
+      .insert({
+        username: data.username,
+        email: data.email || data.username,
+        full_name: data.full_name || data.username,
+      })
+      .select()
+      .single();
 
-      // Check if user exists
-      const [existing] = await connection.execute(
-        "SELECT user_id FROM users WHERE email = ? OR username = ?",
-        [data.email || data.username, data.username],
-      );
-
-      if ((existing as any[]).length > 0) {
-        return res.status(400).json({ error: "User already exists" });
-      }
-
-      // Hash password
-      const password_hash = await bcrypt.hash(data.password, 10);
-
-      // Create user
-      const [result] = await connection.execute(
-        `INSERT INTO users (username, email, password_hash, full_name)
-         VALUES (?, ?, ?, ?)`,
-        [
-          data.username,
-          data.email || data.username,
-          password_hash,
-          data.full_name || data.username,
-        ],
-      );
-
-      const userId = (result as any).insertId;
-
-      // Create user statistics record
-      await connection.execute(
-        `INSERT INTO user_statistics (user_id) VALUES (?)`,
-        [userId],
-      );
-
-      // Generate token
-      const token = createToken(userId, data.email || data.username);
-
-      res.status(201).json({
-        message: "User registered successfully",
-        token,
-        user: { userId, username: data.username, email: data.email },
-      });
-    } catch (dbError: any) {
-      console.warn("Database registration failed:", dbError.message);
-      // If database fails, allow registration without it for now
-      res.status(201).json({
-        message: "User registered successfully",
-        token: createToken(
-          Math.floor(Math.random() * 10000),
-          data.email || data.username,
-        ),
-        user: { userId: 1, username: data.username, email: data.email },
-      });
-    } finally {
-      if (connection) {
-        connection.release();
-      }
+    if (userError || !newUser) {
+      console.error("Failed to create user:", userError);
+      return res.status(500).json({ error: "Registration failed" });
     }
+
+    // Create user statistics record
+    await supabase
+      .from("user_statistics")
+      .insert({ user_id: newUser.id });
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user: { userId: newUser.id, username: newUser.username, email: newUser.email },
+    });
   } catch (error: any) {
     console.error("Register error:", error);
 
@@ -121,67 +70,31 @@ export const handleLogin: RequestHandler = async (req, res) => {
   try {
     const data = loginSchema.parse(req.body);
 
-    // Check for hardcoded admin credentials
-    if (data.email === ADMIN_EMAIL && data.password === ADMIN_PASSWORD) {
-      const token = createToken(1, ADMIN_EMAIL);
-      return res.json({
-        message: "Login successful",
-        token,
-        user: { userId: 1, username: ADMIN_USERNAME, email: ADMIN_EMAIL },
-      });
-    }
+    // Find user
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id, username, email")
+      .eq("email", data.email)
+      .maybeSingle();
 
-    // Try database login
-    let connection;
-    try {
-      connection = await pool.getConnection();
-
-      // Find user
-      const [users] = await connection.execute(
-        "SELECT user_id, username, email, password_hash FROM users WHERE email = ?",
-        [data.email],
-      );
-
-      const user = (users as any[])[0];
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      // Verify password
-      const validPassword = await bcrypt.compare(
-        data.password,
-        user.password_hash,
-      );
-      if (!validPassword) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      // Update last login
-      await connection.execute(
-        "UPDATE users SET last_login = NOW() WHERE user_id = ?",
-        [user.user_id],
-      );
-
-      // Generate token
-      const token = createToken(user.user_id, user.email);
-
-      res.json({
-        message: "Login successful",
-        token,
-        user: {
-          userId: user.user_id,
-          username: user.username,
-          email: user.email,
-        },
-      });
-    } catch (dbError: any) {
-      console.warn("Database login failed:", dbError.message);
+    if (userError || !user) {
       return res.status(401).json({ error: "Invalid credentials" });
-    } finally {
-      if (connection) {
-        connection.release();
-      }
     }
+
+    // Update last login
+    await supabase
+      .from("users")
+      .update({ last_login: new Date().toISOString() })
+      .eq("id", user.id);
+
+    res.json({
+      message: "Login successful",
+      user: {
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (error: any) {
     console.error("Login error:", error);
 
@@ -197,46 +110,17 @@ export const handleGetProfile: RequestHandler = async (req, res) => {
   try {
     const userId = (req as any).userId;
 
-    // Return hardcoded admin profile
-    if (userId === 1) {
-      return res.json({
-        user_id: 1,
-        username: ADMIN_USERNAME,
-        email: ADMIN_EMAIL,
-        full_name: "Admin User",
-        avatar_url: null,
-        default_currency: "BRL",
-        timezone: "America/Sao_Paulo",
-        language: "pt-BR",
-        theme: "light",
-        created_at: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-      });
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id, username, email, full_name, avatar_url, default_currency, timezone, language, theme, created_at, last_login")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error || !user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    // Try database
-    let connection;
-    try {
-      connection = await pool.getConnection();
-
-      const [users] = await connection.execute(
-        `SELECT user_id, username, email, full_name, avatar_url,
-                default_currency, timezone, language, theme, created_at, last_login
-         FROM users WHERE user_id = ?`,
-        [userId],
-      );
-
-      const user = (users as any[])[0];
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      res.json(user);
-    } finally {
-      if (connection) {
-        connection.release();
-      }
-    }
+    res.json(user);
   } catch (error) {
     console.error("Get profile error:", error);
     res.status(500).json({ error: "Failed to get profile" });
@@ -247,51 +131,35 @@ export const handleUpdateProfile: RequestHandler = async (req, res) => {
   try {
     const userId = (req as any).userId;
 
-    // Admin profile is read-only
-    if (userId === 1) {
-      return res.json({ message: "Admin profile cannot be updated" });
+    const {
+      full_name,
+      avatar_url,
+      default_currency,
+      timezone,
+      language,
+      theme,
+    } = req.body;
+
+    const updates: any = {};
+    if (full_name !== undefined) updates.full_name = full_name;
+    if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+    if (default_currency !== undefined) updates.default_currency = default_currency;
+    if (timezone !== undefined) updates.timezone = timezone;
+    if (language !== undefined) updates.language = language;
+    if (theme !== undefined) updates.theme = theme;
+    updates.updated_at = new Date().toISOString();
+
+    const { error } = await supabase
+      .from("users")
+      .update(updates)
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Update profile error:", error);
+      return res.status(500).json({ error: "Failed to update profile" });
     }
 
-    // Try database
-    let connection;
-    try {
-      connection = await pool.getConnection();
-
-      const {
-        full_name,
-        avatar_url,
-        default_currency,
-        timezone,
-        language,
-        theme,
-      } = req.body;
-
-      await connection.execute(
-        `UPDATE users
-         SET full_name = COALESCE(?, full_name),
-             avatar_url = COALESCE(?, avatar_url),
-             default_currency = COALESCE(?, default_currency),
-             timezone = COALESCE(?, timezone),
-             language = COALESCE(?, language),
-             theme = COALESCE(?, theme)
-         WHERE user_id = ?`,
-        [
-          full_name,
-          avatar_url,
-          default_currency,
-          timezone,
-          language,
-          theme,
-          userId,
-        ],
-      );
-
-      res.json({ message: "Profile updated successfully" });
-    } finally {
-      if (connection) {
-        connection.release();
-      }
-    }
+    res.json({ message: "Profile updated successfully" });
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(500).json({ error: "Failed to update profile" });

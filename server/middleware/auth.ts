@@ -1,14 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+import supabase from "../supabase";
 
 export interface AuthRequest extends Request {
-  userId?: number;
+  userId?: string;
   userEmail?: string;
 }
 
-export const authMiddleware = (
+export const authMiddleware = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -22,9 +20,14 @@ export const authMiddleware = (
 
     const token = authHeader.substring(7);
 
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    req.userId = decoded.userId;
-    req.userEmail = decoded.email;
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    req.userId = user.id;
+    req.userEmail = user.email;
 
     next();
   } catch (error) {
@@ -33,7 +36,7 @@ export const authMiddleware = (
   }
 };
 
-export const optionalAuthMiddleware = (
+export const optionalAuthMiddleware = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -43,14 +46,16 @@ export const optionalAuthMiddleware = (
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, JWT_SECRET) as any;
-      req.userId = decoded.userId;
-      req.userEmail = decoded.email;
+      const { data: { user } } = await supabase.auth.getUser(token);
+
+      if (user) {
+        req.userId = user.id;
+        req.userEmail = user.email;
+      }
     }
 
     next();
   } catch (error) {
-    // Optional auth, just continue
     next();
   }
 };

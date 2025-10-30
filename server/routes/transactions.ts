@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import pool from "../db";
+import supabase from "../supabase";
 import { AuthRequest } from "../middleware/auth";
 
 export const handleGetTransactions: RequestHandler = async (
